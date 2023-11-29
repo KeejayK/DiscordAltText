@@ -43,6 +43,7 @@ async def get_text_from_image_azure(image_url):
 
     analysis_options.features = (
         sdk.ImageAnalysisFeature.CAPTION |
+        sdk.ImageAnalysisFeature.DENSE_CAPTION |
         sdk.ImageAnalysisFeature.TEXT
     )
 
@@ -56,6 +57,10 @@ async def get_text_from_image_azure(image_url):
             print(" Caption:")
             print("   '{}', Confidence {:.4f}".format(result.caption.content, result.caption.confidence))
             return result.caption.content
+        if result.dense_captions is not None:
+            print(" Dense Captions:")
+            for caption in result.dense_captions:
+                print("   '{}', {}, Confidence: {:.4f}".format(caption.content, caption.bounding_box, caption.confidence))
         if result.text is not None:
             print(" Text:")
             for line in result.text.lines:
