@@ -43,7 +43,7 @@ async def get_text_from_image_azure(image_url):
 
     analysis_options.features = (
         sdk.ImageAnalysisFeature.CAPTION |
-        sdk.ImageAnalysisFeature.DENSE_CAPTION |
+        sdk.ImageAnalysisFeature.DENSE_CAPTIONS |
         sdk.ImageAnalysisFeature.TEXT
     )
 
