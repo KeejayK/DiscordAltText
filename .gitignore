@@ -5,3 +5,7 @@ __pycache__/
 *$py.class
 *.config
 node_modules
+
+.DS_Store
+./env.py
+*.env
