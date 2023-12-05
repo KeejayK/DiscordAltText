@@ -13,24 +13,35 @@ client = AsyncOpenAI(api_key=open_ai_token)
 
 # note: it seems like openAI doesn't give out free credits anymore
 # https://platform.openai.com/docs/api-reference/chat/create?lang=python
-async def get_text_from_image_openai(image_url):
+async def get_text_from_image_openai(image_url, context = {}):
+    prompt_text = [
+        "You are a bot for a Discord server. This implies that some images are memes and some are not. "
+        "You are to generate a caption for the image. The caption should be a complete sentence and concise. "
+        "The caption should be no more than 50 words. "
+        "Use Plain Language. Use simple words. "
+        "Avoid jargon, technical terms, and abbreviations. "
+        "Include information about the location if it is relevant. "
+        ]
+        
     response = await client.chat.completions.create(
         model="gpt-4-vision-preview",
         messages=[
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "What's in this image?"},
+                    {"type": "text",
+                     "text": ' '.join(prompt_text)
+                     },
                     {
                         "type": "image_url",
-                        "image_url": image_url,
+                        "image_url": image_url
                     },
                 ],
             }
         ],
         max_tokens=300,
     )
-    print(response.choices[0])
+    print(response.choices[0].message.content)
 
 # azure
 # taken from https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/quickstarts-sdk/image-analysis-client-library-40?tabs=visual-studio%2Cwindows&pivots=programming-language-python
@@ -76,5 +87,7 @@ async def get_text_from_image_azure(image_url):
             print("   Error reason: {}".format(error_details.reason))
             print("   Error code: {}".format(error_details.error_code))
             print("   Error message: {}".format(error_details.message))
+    else:
+        print("Image analysis failed: {}".format(result))
 
 
