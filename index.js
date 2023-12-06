@@ -5,7 +5,8 @@ const { Client, Collection, Events, GatewayIntentBits } = require("discord.js");
 const { token } = require("./config.json");
 
 
-var enableAuto = true;
+var enableAutoReply = true;
+var recentImages = [];
 
 
 // Create a new client instance
@@ -50,13 +51,19 @@ client.once(Events.ClientReady, (readyClient) => {
 
 client.on("messageCreate", (message) => {
     console.log(message);
+	// Ignore messages sent by self
     if (message.author.bot) return;
-	if (enableAuto) {
-		let images = [];
-		message.attachments.forEach((value) => {
-			images.push(value.url);
-		});
-		console.log(images);
+
+	let images = [];
+	message.attachments.forEach((value) => {
+		images.push(value.url);
+		recentImages.push(value.url);
+	});
+	console.log(images);
+
+
+	// Only generate and reply with images if auto reply is enabled
+	if (enableAutoReply) {
 		// call ai get_text_from_image_openai and get_text_from_image_azure from ai.py
 		message.reply({ content: images });
 	}
@@ -89,9 +96,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
     // Command Logic
     try {
         response = await command.execute(interaction);
-		console.log(response)
-		if ('enable' in response) {
-			enableAuto = response['enable']
+		if (response && 'enable' in response ) {
+			enableAutoReply = response['enable']
 		}
     } catch (error) {
         console.error(error);
