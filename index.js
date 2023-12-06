@@ -4,6 +4,10 @@ const path = require("node:path");
 const { Client, Collection, Events, GatewayIntentBits } = require("discord.js");
 const { token } = require("./config.json");
 
+
+var enableAuto = true;
+
+
 // Create a new client instance
 const client = new Client({
     intents: [
@@ -47,13 +51,15 @@ client.once(Events.ClientReady, (readyClient) => {
 client.on("messageCreate", (message) => {
     console.log(message);
     if (message.author.bot) return;
-    let images = [];
-    message.attachments.forEach((value) => {
-        images.push(value.url);
-    });
-    console.log(images);
-    // call ai get_text_from_image_openai and get_text_from_image_azure from ai.py
-    message.reply({ content: images });
+	if (enableAuto) {
+		let images = [];
+		message.attachments.forEach((value) => {
+			images.push(value.url);
+		});
+		console.log(images);
+		// call ai get_text_from_image_openai and get_text_from_image_azure from ai.py
+		message.reply({ content: images });
+	}
 });
 
 // Error handling
@@ -68,7 +74,6 @@ client.on("error", (error) => {
 
 // Listener for the interactionCreate event
 client.on(Events.InteractionCreate, async (interaction) => {
-    console.log(interaction);
     // Ignore interactions that aren't slash commands
     if (!interaction.isChatInputCommand()) return;
 
@@ -83,7 +88,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     // Command Logic
     try {
-        await command.execute(interaction);
+        response = await command.execute(interaction);
+		console.log(response)
+		if ('enable' in response) {
+			enableAuto = response['enable']
+		}
     } catch (error) {
         console.error(error);
         if (interaction.replied || interaction.deferred) {
