@@ -21,6 +21,7 @@ async def get_text_from_image_openai(image_url, context = {}):
         "Use Plain Language. Use simple words. "
         "Avoid jargon, technical terms, and abbreviations. "
         "Include information about the location if it is relevant. "
+        "Be gender-neutral. "
         ]
         
     response = await client.chat.completions.create(
@@ -42,6 +43,7 @@ async def get_text_from_image_openai(image_url, context = {}):
         max_tokens=300,
     )
     print(response.choices[0].message.content)
+    return response.choices[0].message.content
 
 # azure
 # taken from https://learn.microsoft.com/en-us/azure/ai-services/computer-vision/quickstarts-sdk/image-analysis-client-library-40?tabs=visual-studio%2Cwindows&pivots=programming-language-python
