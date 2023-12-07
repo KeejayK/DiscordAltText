@@ -35,12 +35,14 @@ async def get_text_from_image_openai(image_url, context = {}):
                      },
                     {
                         "type": "image_url",
-                        "image_url": image_url
+                        "image_url": {
+                            "url": image_url
+                        }
                     },
                 ],
             }
         ],
-        max_tokens=300,
+        max_tokens=450,
     )
     print(response.choices[0].message.content)
     return response.choices[0].message.content
