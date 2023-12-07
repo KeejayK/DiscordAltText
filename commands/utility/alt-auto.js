@@ -12,7 +12,7 @@ module.exports = {
                 )
                 .setRequired(true)
         ),
-    async execute(interaction) {
+    async execute(interaction, args) {
         let enable = interaction.options.getBoolean("enable");
         let response = enable
             ? "Auto generate enabled! Alt text will be provided for every image sent"

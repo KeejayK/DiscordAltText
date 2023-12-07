@@ -1,7 +1,7 @@
 // Require the necessary discord.js classes
 const fs = require("node:fs");
 const path = require("node:path");
-const { Client, Collection, Events, GatewayIntentBits } = require("discord.js");
+const { Client, Collection, Events, GatewayIntentBits, AttachmentBuilder } = require("discord.js");
 const { token } = require("./config.json");
 
 
@@ -43,21 +43,23 @@ for (const folder of commandFolders) {
 }
 
 // When the client is ready, run this code (only once).
-// The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
-// It makes some properties non-nullable.
 client.once(Events.ClientReady, (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
+// On every message
 client.on("messageCreate", (message) => {
     console.log(message);
 	// Ignore messages sent by self
     if (message.author.bot) return;
-
 	let images = [];
+    let hasImage = false;
 	message.attachments.forEach((value) => {
-		images.push(value.url);
-		recentImages.push(value.url);
+        if (value.width && value.height) {
+            images.push(value.url);
+            recentImages.push(value.url);
+            hasImage = true;
+        }
 	});
 	console.log(images);
 
@@ -65,7 +67,11 @@ client.on("messageCreate", (message) => {
 	// Only generate and reply with images if auto reply is enabled
 	if (enableAutoReply) {
 		// call ai get_text_from_image_openai and get_text_from_image_azure from ai.py
-		message.reply({ content: images });
+        const attachment = new AttachmentBuilder(images.toString(), {description: 'testing description'}) 
+        if (hasImage) {
+            message.channel.send({ content: `${message.author} Has sent: ${message.content}`, files: [attachment] });
+            message.delete()
+        }
 	}
 });
 
@@ -95,8 +101,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     // Command Logic
     try {
-        response = await command.execute(interaction);
-		if (response && 'enable' in response ) {
+		args = recentImages
+        response = await command.execute(interaction, args);
+		if (typeof response === 'undefined') return
+		if ('enable' in response ) {
 			enableAutoReply = response['enable']
 		}
     } catch (error) {
