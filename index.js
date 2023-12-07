@@ -1,6 +1,7 @@
 // Require the necessary discord.js classes
 const fs = require("node:fs");
 const path = require("node:path");
+const { openaiApiCall, azureVisionApiCall } = require("./ai.js");
 const { Client, Collection, Events, GatewayIntentBits, AttachmentBuilder } = require("discord.js");
 const { token } = require("./config.json");
 
@@ -48,30 +49,30 @@ client.once(Events.ClientReady, (readyClient) => {
 });
 
 // On every message
-client.on("messageCreate", (message) => {
+client.on("messageCreate", async (message) => {
     console.log(message);
 	// Ignore messages sent by self
     if (message.author.bot) return;
 	let images = [];
+    let recentImageURL = "";
     let hasImage = false;
 	message.attachments.forEach((value) => {
         if (value.width && value.height) {
             images.push(value.url);
-            recentImages.push(value.url);
+            recentImageURL = value.url;
             hasImage = true;
         }
 	});
 	console.log(images);
 
-
 	// Only generate and reply with images if auto reply is enabled
-	if (enableAutoReply) {
+	if (enableAutoReply & hasImage) {
 		// call ai get_text_from_image_openai and get_text_from_image_azure from ai.py
-        const attachment = new AttachmentBuilder(images.toString(), {description: 'testing description'}) 
-        if (hasImage) {
-            message.channel.send({ content: `${message.author} Has sent: ${message.content}`, files: [attachment] });
-            message.delete()
-        }
+        const openaiAltObj = openaiApiCall(recentImageURL);
+        const azureAltObj = azureVisionApiCall(recentImageURL);
+        await message.reply({ content: `ALT TEXT: \n:one: ${openaiAltObj[content]}\n\n:two: ${azureAltObj[content   ]}\n\nPlease vote :one: or :two: for better caption` });
+        // message.channel.send({ content: `${message.author} Has sent: ${message.content}`, files: [attachment] });
+        // message.delete()
 	}
 });
 

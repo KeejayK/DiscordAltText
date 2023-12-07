@@ -1,3 +1,8 @@
+const { exec } = require('child_process')
+const dotenv = require('dotenv');
+
+dotenv.config()
+
 const openaiApiCall = (imageUrl) => {
     const openAiToken = process.env.OPENAI_TOKEN;
     const promptText = `You are a bot for a Discord server. This implies that some images are memes and some are not. 
@@ -7,7 +12,7 @@ const openaiApiCall = (imageUrl) => {
                         Avoid jargon, technical terms, and abbreviations. 
                         Include information about the location if it is relevant. 
                         Be gender-neutral.`;
-  
+
     const data = {
       model: "gpt-4-vision-preview",
       messages: [
@@ -21,13 +26,26 @@ const openaiApiCall = (imageUrl) => {
       ],
       max_tokens: 300
     };
-  
-    const curlCommand = `curl https://api.openai.com/v1/chat/completions \\
-      -H "Content-Type: application/json" \\
-      -H "Authorization: Bearer ${openAiToken}" \\
-      -d '${JSON.stringify(data)}'`;
-  
-    return curlCommand; // Change this to return the response (response.choices[0].message.content)
+
+    var response = [];
+    const curlCommand = `curl https://api.openai.com/v1/chat/completions \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer ${openAiToken}" \
+        -d '${JSON.stringify(data)}'`;
+
+    exec(curlCommand, { encoding: 'utf-8' }, (error, stdout, stderr) => {
+      if (error !== null) {
+          console.log('Error', error, stderr);
+          return;
+      }
+
+      response = stdout.split('\n\n');
+    })
+
+    console.log(response[0]);
+    console.log(`\n\n${response[1]}`);
+
+    return response; // Change this to return the response (response.choices[0].message.content)
 };
 
 const azureVisionApiCall = (imageUrl) => {
@@ -36,15 +54,33 @@ const azureVisionApiCall = (imageUrl) => {
 
     const data = { url: imageUrl };
 
+    const response = [];
     const curlCommand = `curl -H "Ocp-Apim-Subscription-Key: ${subscriptionKey}" -H "Content-Type: application/json" \\
         "${endpoint}/computervision/imageanalysis:analyze?features=caption,read&model-version=latest&language=en&api-version=2023-10-01" \\
         -d '${JSON.stringify(data)}'`;
 
-    return curlCommand; // Change this to return the response (response.description.captions[0].text)
+    exec(curlCommand, { encoding: 'utf-8' }, (error, stdout, stderr) => {
+      if (error !== null) {
+          console.log('Error', error, stderr);
+          return;
+      }
+
+      response = stdout.split('\n\n');
+    })
+
+    console.log(response[0]);
+    console.log(`\n\n${response[1]}`);
+
+    return response; // Change this to return the response (response.description.captions[0].text)
+};
+
+module.exports = {
+  openaiApiCall,
+  azureVisionApiCall,
 };
 
 // Usage example
 const imageUrl = "https://your-image-url.com"; // Replace with your image URL
 console.log(openaiApiCall(imageUrl));
-console.log(azureVisionApiCall(imageUrl));
+// console.log(azureVisionApiCall(imageUrl));
 
