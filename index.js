@@ -1,6 +1,7 @@
 // Require the necessary discord.js classes
 const fs = require("node:fs");
 const path = require("node:path");
+const database = require('./firebase.js');
 const { openaiApiCall, azureVisionApiCall } = require("./ai.js");
 const { Client, Collection, Events, GatewayIntentBits, AttachmentBuilder } = require("discord.js");
 const { token } = require("./config.json");
@@ -46,6 +47,24 @@ for (const folder of commandFolders) {
 // When the client is ready, run this code (only once).
 client.once(Events.ClientReady, (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+    
+    // Loop through every guild and create a new key for it. commenting out because i already ran this once, so the info is in the firebase
+    // client.guilds.cache.forEach(guild => {
+    //     let member_object = {};
+    //     guild.members.cache.forEach(member => {
+    //         member_object[member.id] = 0;
+    //     });
+    //     database.ref(guild.id).set(member_object);
+    // });
+});
+
+// testing leaderboard/database. upon joining a new server, create a new key for it
+client.on('guildCreate', guild => {
+    let member_object = {};
+    guild.members.cache.forEach(member => {
+        member_object[member.id] = 0;
+    });
+    database.ref(guild.id).set(member_object);
 });
 
 // On every message
@@ -74,6 +93,26 @@ client.on("messageCreate", async (message) => {
         // message.channel.send({ content: `${message.author} Has sent: ${message.content}`, files: [attachment] });
         // message.delete()
 	}
+
+    // testing database. increment count of each user by 1 when they send a message.
+    let guild_id = message.guild.id;
+    let member_id = message.author.id;
+    database.ref(`${guild_id}/${member_id}`).once('value', snapshot => {
+        let member_object;
+        if (snapshot.exists()) {
+            member_object = snapshot.val();
+        } else {
+            member_object = 0;
+            database.ref(`${guild_id}/${member_id}`).set(member_object);
+        }
+
+        // Increase the count by 1
+        member_object += 1;
+
+        // Update the count
+        database.ref(`${guild_id}/${member_id}`).set(member_object);
+    });
+
 });
 
 // Error handling

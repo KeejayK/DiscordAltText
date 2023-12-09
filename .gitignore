@@ -6,6 +6,7 @@ __pycache__/
 *.config
 config.json
 node_modules
+serviceAccountKey.json
 
 .DS_Store
 ./env.py
