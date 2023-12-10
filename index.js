@@ -69,7 +69,7 @@ client.on('guildCreate', guild => {
 
 // On every message
 client.on("messageCreate", async (message) => {
-    console.log(message);
+    // console.log(message);
 	// Ignore messages sent by self
     if (message.author.bot) return;
 	let images = [];
@@ -82,14 +82,15 @@ client.on("messageCreate", async (message) => {
             hasImage = true;
         }
 	});
-	console.log(images);
+	// console.log(images);
 
 	// Only generate and reply with images if auto reply is enabled
 	if (enableAutoReply & hasImage) {
 		// call ai get_text_from_image_openai and get_text_from_image_azure from ai.py
-        const openaiAltObj = openaiApiCall(recentImageURL);
-        const azureAltObj = azureVisionApiCall(recentImageURL);
-        await message.reply({ content: `ALT TEXT: \n:one: ${openaiAltObj[content]}\n\n:two: ${azureAltObj[content   ]}\n\nPlease vote :one: or :two: for better caption` });
+        const openaiAltObj = await openaiApiCall(recentImageURL);
+        const azureAltObj = await azureVisionApiCall(recentImageURL);
+        console.log(openaiAltObj, azureAltObj);
+        await message.reply({ content: `ALT TEXT: \n:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption` });
         // message.channel.send({ content: `${message.author} Has sent: ${message.content}`, files: [attachment] });
         // message.delete()
 	}
