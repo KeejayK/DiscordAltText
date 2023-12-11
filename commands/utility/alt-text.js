@@ -13,10 +13,6 @@ module.exports = {
         // Call AI function
         const openaiAltObj = await openaiApiCall(mostRecent);
         const azureAltObj = await azureVisionApiCall(mostRecent);
-        console.log('generated alt text:', openaiAltObj, azureAltObj);
-        // await interaction.reply({
-        //     content: `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption`,
-        // });
         interaction.editReply(`:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption`)
     },
 };
