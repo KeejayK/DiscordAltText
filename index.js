@@ -54,6 +54,31 @@ for (const folder of commandFolders) {
     }
 }
 
+/**
+ * Give a point to the user who 
+ * 
+ * @param {Message<boolean>} message 
+ */
+const awardPointToUser = (interaction) => {
+    let guild_id = interaction.guild.id;
+    let member_id = interaction.user.id;
+    database.ref(`${guild_id}/${member_id}`).once('value', snapshot => {
+        let member_object;
+        if (snapshot.exists()) {
+            users_points = snapshot.val();
+        } else {
+            users_points = 0;
+            database.ref(`${guild_id}/${member_id}`).set(users_points);
+        }
+
+        // Increase the count by 1
+        users_points += 1;
+
+        // Update the count
+        database.ref(`${guild_id}/${member_id}`).set(users_points);
+    });
+}
+
 // When the client is ready, run this code (only once).
 client.once(Events.ClientReady, (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
@@ -94,6 +119,21 @@ client.on("messageCreate", async (message) => {
 	});
 	// console.log(images);
 
+    // Create the button reactions that we'll append to the
+    // "vote on these captions" message the bot sends.
+    var voteOpenAi = new ButtonBuilder()
+        .setCustomId('vote-openai')
+        .setLabel('1️⃣ 0')
+        .setStyle(ButtonStyle.Secondary);
+
+    var voteAzure = new ButtonBuilder()
+        .setCustomId('vote-azure')
+        .setLabel('2️⃣ 0')
+        .setStyle(ButtonStyle.Secondary);
+
+    var row = new ActionRowBuilder()
+        .addComponents(voteOpenAi, voteAzure);
+
 	// Only generate and reply with images if auto reply is enabled
 	if (enableAutoReply & hasImage) {
 		// call ai get_text_from_image_openai and get_text_from_image_azure from ai.py
@@ -102,73 +142,68 @@ client.on("messageCreate", async (message) => {
         console.log(openaiAltObj, azureAltObj);
         const reply = await message.reply({
             content: `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption`,
-            fetchReply: true,
+            components: [row],
         });
         // message.channel.send({ content: `${message.author} Has sent: ${message.content}`, files: [attachment] });
         // message.delete()
 
-        reply.react("👍");
+        // Use a 
+        var votes_openai = 0;
+        var votes_azure = 0;
 
         // Filter checks to see if the button that was clicked or
         // interacted with is the same as the message that was sent
         // (this ensures that we're only listening for interactions with
         // buttons that are part of the message the discord bot sent).
-        const vote_openai_filter = (reaction, user) => {
-            return reaction.emoji.name === '👍' && user.id === message.author.id;
-        }
-        const vote_azure_filter = (reaction, user) => {
-            return reaction.emoji.name === ':two:' && user.id === message.author.id;
-        }
-        const collector = reply.createReactionCollector({
-            filter: vote_openai_filter,
+        const filter = (i) => i.user.id === message.author.id;
+        const collector = reply.createMessageComponentCollector({
+            componentType: ComponentType.Button,
             time: 10000,
-            max: 5,
+            max:5,
+            filter: filter,
         });
 
-        collector.on('collect', (reaction, user) => {
-            console.log(`Collected ${reaction.emoji.name} from ${user.tag}`);
+        collector.on('collect', (interaction) => {
+            if (interaction.customId === 'vote-openai') {
+                votes_openai += 1;
+                interaction.deferUpdate();
+                voteOpenAi.setLabel(`1️⃣ ${votes_openai}`);
+            }
 
-            // if (reaction === ':two:') {
-            //     console.log(`Collected ${reaction.emoji.name} from ${user.tag}`);
-            //     // interaction.reply('You voted for the Azure caption!');
-            //     return;
-            // }
+            if (interaction.customId === 'vote-azure') {
+                votes_azure += 1;
+                interaction.deferUpdate();
+                voteAzure.setLabel(`2️⃣ ${votes_azure}`);
+            }
+
+            awardPointToUser(interaction);
+            row = new ActionRowBuilder()
+                .addComponents(voteOpenAi, voteAzure);
+
+            reply.edit({
+                content: `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption`,
+                components: [row]
+            });
+            return;
         });
 
-        collector.on('end', collected => {
-            console.log(`Collected ${collected.size} items`);
-            collected.forEach((value, key) => {
-                console.log(`Key: ${key}, Value: ${value}`);
-            })
+        collector.on('end', () => {
+            voteOpenAi.setDisabled(true);
+            voteAzure.setDisabled(true);
 
-            // reply.edit({
-            //     content: `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}`,
-            //     components: [button]
-            // })
+            if (votes_openai >= votes_azure) {
+                reply.edit({
+                    content: `Alt: ${openaiAltObj}`,
+                    components: []
+                });
+            } else {
+                reply.edit({
+                    content: `Alt: ${azureAltObj}`,
+                    components: []
+                })
+            }
         });
-	}
-
-    // 
-
-    // testing database. increment count of each user by 1 when they send a message.
-    let guild_id = message.guild.id;
-    let member_id = message.author.id;
-    database.ref(`${guild_id}/${member_id}`).once('value', snapshot => {
-        let member_object;
-        if (snapshot.exists()) {
-            member_object = snapshot.val();
-        } else {
-            member_object = 0;
-            database.ref(`${guild_id}/${member_id}`).set(member_object);
-        }
-
-        // Increase the count by 1
-        member_object += 1;
-
-        // Update the count
-        database.ref(`${guild_id}/${member_id}`).set(member_object);
-    });
-
+    }
 });
 
 // Error handling
