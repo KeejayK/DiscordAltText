@@ -3,7 +3,17 @@ const fs = require("node:fs");
 const path = require("node:path");
 const database = require('./firebase.js');
 const { openaiApiCall, azureVisionApiCall } = require("./ai.js");
-const { Client, Collection, Events, GatewayIntentBits, AttachmentBuilder } = require("discord.js");
+const { 
+    Client, 
+    Collection, 
+    Events, 
+    GatewayIntentBits, 
+    AttachmentBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ActionRowBuilder,
+    ComponentType, // TODO: Remove any of these if not used
+ } = require("discord.js");
 const { token } = require("./config.json");
 
 
@@ -90,10 +100,55 @@ client.on("messageCreate", async (message) => {
         const openaiAltObj = await openaiApiCall(recentImageURL);
         const azureAltObj = await azureVisionApiCall(recentImageURL);
         console.log(openaiAltObj, azureAltObj);
-        await message.reply({ content: `ALT TEXT: \n:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption` });
+        const reply = await message.reply({
+            content: `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption`,
+            fetchReply: true,
+        });
         // message.channel.send({ content: `${message.author} Has sent: ${message.content}`, files: [attachment] });
         // message.delete()
+
+        reply.react("👍");
+
+        // Filter checks to see if the button that was clicked or
+        // interacted with is the same as the message that was sent
+        // (this ensures that we're only listening for interactions with
+        // buttons that are part of the message the discord bot sent).
+        const vote_openai_filter = (reaction, user) => {
+            return reaction.emoji.name === '👍' && user.id === message.author.id;
+        }
+        const vote_azure_filter = (reaction, user) => {
+            return reaction.emoji.name === ':two:' && user.id === message.author.id;
+        }
+        const collector = reply.createReactionCollector({
+            filter: vote_openai_filter,
+            time: 10000,
+            max: 5,
+        });
+
+        collector.on('collect', (reaction, user) => {
+            console.log(`Collected ${reaction.emoji.name} from ${user.tag}`);
+
+            // if (reaction === ':two:') {
+            //     console.log(`Collected ${reaction.emoji.name} from ${user.tag}`);
+            //     // interaction.reply('You voted for the Azure caption!');
+            //     return;
+            // }
+        });
+
+        collector.on('end', collected => {
+            console.log(`Collected ${collected.size} items`);
+            collected.forEach((value, key) => {
+                console.log(`Key: ${key}, Value: ${value}`);
+            })
+
+            // reply.edit({
+            //     content: `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}`,
+            //     components: [button]
+            // })
+        });
 	}
+
+    // 
 
     // testing database. increment count of each user by 1 when they send a message.
     let guild_id = message.guild.id;
