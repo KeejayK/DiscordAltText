@@ -65,17 +65,17 @@ const awardPointToUser = (interaction) => {
     database.ref(`${guild_id}/${member_id}`).once('value', snapshot => {
         let member_object;
         if (snapshot.exists()) {
-            users_points = snapshot.val();
+            points = snapshot.val().points;
         } else {
-            users_points = 0;
-            database.ref(`${guild_id}/${member_id}`).set(users_points);
+            points = 0;
+            database.ref(`${guild_id}/${member_id}`).set({ username: member.user.username, points: points });
         }
-
+        
         // Increase the count by 1
-        users_points += 1;
-
+        points++;
+        
         // Update the count
-        database.ref(`${guild_id}/${member_id}`).set(users_points);
+        database.ref(`${guild_id}/${member_id}/points`).set(points);
     });
 }
 
@@ -84,21 +84,31 @@ client.once(Events.ClientReady, (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
     
     // Loop through every guild and create a new key for it. commenting out because i already ran this once, so the info is in the firebase
-    // client.guilds.cache.forEach(guild => {
+    // client.guilds.cache.forEach(async guild => {
     //     let member_object = {};
-    //     guild.members.cache.forEach(member => {
-    //         member_object[member.id] = 0;
-    //     });
+    //     await guild.members.fetch().then(members => {
+    //         members.forEach(member => {
+    //             member_object[member.id] = {
+    //                 username: member.user.username,
+    //                 points: 0
+    //             };
+    //         });
+    //     }).catch(console.error);
     //     database.ref(guild.id).set(member_object);
     // });
 });
 
 // testing leaderboard/database. upon joining a new server, create a new key for it
-client.on('guildCreate', guild => {
+client.on('guildCreate', async guild => {
     let member_object = {};
-    guild.members.cache.forEach(member => {
-        member_object[member.id] = 0;
-    });
+    await guild.members.fetch().then(members => {
+        members.forEach(member => {
+            member_object[member.id] = {
+                username: member.user.username,
+                points: 0
+            };
+        });
+    }).catch(console.error);
     database.ref(guild.id).set(member_object);
 });
 

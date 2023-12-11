@@ -23,28 +23,27 @@ module.exports = {
                 snapshot.forEach(function(childSnapshot) {
                     count += 1;
                     const user_id = childSnapshot.key;
-                    const points = childSnapshot.val();
-                    console.log(`User_id: ${user_id}`);
-                    console.log(`points: ${points}`);
+                    const username = childSnapshot.val().username;
+                    const points = childSnapshot.val().points;
+                    // console.log(`User ID: ${user_id}, Username: ${username}, Points: ${points}`);
 
                     if (count <= 10) {
                         // Add the field to the embed
-                        users.push([user_id, points]);
+                        users.push([username, points]);
                     }
                 })
             })
 
-    console.log(users);
     var ranking = 0
     // Users is an array of [user_id , points] pairs
     users.reverse().forEach(async (entry) => {
         ranking += 1; 
-        user_id = entry[0];
+        username = entry[0];
         points = entry[1];
-        // TODO: need to make it so that it displays the user's display name, not id.
+        // TODO: need to make it so that it displays the user's display name, not id. this has been done :D
         // const name = await interaction.guild.members.fetch(user_id).displayName;
-        // console.log(name)
-        embed.addFields({name: `#${ranking} - ${user_id}`, value: `Score: ${points}`, inline: false});
+        // console.log(name) 
+        embed.addFields({name: `#${ranking} - ${username}`, value: `Score: ${points}`, inline: false});
     });
     
     await interaction.reply({ embeds: [embed] });
