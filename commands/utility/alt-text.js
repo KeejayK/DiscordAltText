@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
+const { openaiApiCall, azureVisionApiCall } = require("../../ai.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -7,8 +8,11 @@ module.exports = {
         // CHOOSE BETWEEN IMAGES
         ,
     async execute(interaction, args) {
-        let mostRecent =  args.pop()
+        let mostRecent =  args
+        await interaction.deferReply();
         // Call AI function
-        await interaction.reply({ content: mostRecent, ephemeral: false });
+        const openaiAltObj = await openaiApiCall(mostRecent);
+        const azureAltObj = await azureVisionApiCall(mostRecent);
+        interaction.editReply(`:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption`)
     },
 };

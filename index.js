@@ -18,7 +18,7 @@ const { token } = require("./config.json");
 
 
 var enableAutoReply = true;
-var recentImages = [];
+var recentImages = '';
 
 
 // Create a new client instance
@@ -104,7 +104,6 @@ client.on('guildCreate', guild => {
 
 // On every message
 client.on("messageCreate", async (message) => {
-    // console.log(message);
 	// Ignore messages sent by self
     if (message.author.bot) return;
 	let images = [];
@@ -115,6 +114,7 @@ client.on("messageCreate", async (message) => {
             images.push(value.url);
             recentImageURL = value.url;
             hasImage = true;
+            recentImages = value.url
         }
 	});
 	// console.log(images);
@@ -139,7 +139,6 @@ client.on("messageCreate", async (message) => {
 		// call ai get_text_from_image_openai and get_text_from_image_azure from ai.py
         const openaiAltObj = await openaiApiCall(recentImageURL);
         const azureAltObj = await azureVisionApiCall(recentImageURL);
-        console.log(openaiAltObj, azureAltObj);
         const reply = await message.reply({
             content: `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption`,
             components: [row],
