@@ -35,7 +35,6 @@ const openaiApiCall = async (imageUrl) => {
             },
         ],
     });
-    // console.log(response.choices[0]);
     return(response.choices[0]['message']['content']);
 
 
@@ -58,17 +57,11 @@ const azureVisionApiCall = async (imageUrl) => {
         maxCandidates: 10,
         language: "en",
     };
-    client
-        .describeImage(url, options)
-        .then((result) => {
-            // console.log("The result is:");
-            // console.log(result);
-            return result['captions'][0]['text']
-        })
-        .catch((err) => {
-            console.log("An error occurred:");
-            console.error(err);
-        });
+    let response = await client.describeImage(url, options)
+    if (response['captions'][0]['text']) {
+        return(response['captions'][0]['text'])
+    }
+    return (response)
 };
 
 module.exports = {

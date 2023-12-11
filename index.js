@@ -99,7 +99,8 @@ client.on("messageCreate", async (message) => {
 		// call ai get_text_from_image_openai and get_text_from_image_azure from ai.py
         const openaiAltObj = await openaiApiCall(recentImageURL);
         const azureAltObj = await azureVisionApiCall(recentImageURL);
-        console.log(openaiAltObj, azureAltObj);
+        console.log('openai alt text:', openaiAltObj);
+        console.log('azure alt text:', azureAltObj);
         const reply = await message.reply({
             content: `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption`,
             fetchReply: true,
