@@ -18,7 +18,7 @@ const { token } = require("./config.json");
 
 
 var enableAutoReply = true;
-var recentImages = [];
+var recentImages = '';
 
 
 // Create a new client instance
@@ -79,7 +79,6 @@ client.on('guildCreate', guild => {
 
 // On every message
 client.on("messageCreate", async (message) => {
-    // console.log(message);
 	// Ignore messages sent by self
     if (message.author.bot) return;
 	let images = [];
@@ -90,6 +89,7 @@ client.on("messageCreate", async (message) => {
             images.push(value.url);
             recentImageURL = value.url;
             hasImage = true;
+            recentImages = value.url
         }
 	});
 	// console.log(images);
