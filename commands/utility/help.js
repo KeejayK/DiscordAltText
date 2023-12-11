@@ -9,6 +9,7 @@ module.exports = {
     async execute(interaction) {
 		let helpEmbed = new EmbedBuilder()
 			.setTitle('Commands')
+			.setAuthor({name: 'Alti', iconURL: 'https://alti-9e674.web.app/img/alti.png', url: 'https://alti-9e674.web.app/'})
 		const commandFiles = fs
 			.readdirSync('./commands/utility')
 			.filter((file) => file.endsWith(".js"));
