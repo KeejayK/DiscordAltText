@@ -18,5 +18,6 @@ module.exports = {
             content: `Alt text has been replaced with: ${replacement}`,
             ephemeral: true,
         });
+        return {'editflag': true}
     },
 };

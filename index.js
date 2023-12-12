@@ -22,6 +22,7 @@ var recentImages = '';
 var voteTimer = 10000;
 var voteOverride = false;
 var recentResponse;
+var editflag = false;
 
 
 // Create a new client instance
@@ -194,26 +195,29 @@ client.on("messageCreate", async (message) => {
                 content: `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption`,
                 components: [row]
             });
+            editflag = true;
             return;
         });
 
         collector.on('end', () => {
             voteOpenAi.setDisabled(true);
             voteAzure.setDisabled(true);
-
-            if (voteOverride) {
-                const altContent = votes_openai >= votes_azure ? openaiAltObj : azureAltObj;
-                reply.edit({
-                    content: `Alt: ${altContent}`,
-                    components: []
-                });
-            } else {
-                const altContent = votes_openai >= votes_azure ? `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}` : `:one: ${azureAltObj}\n\n:two: ${openaiAltObj}`;
-                reply.edit({
-                    content: `Alt:\n\n${altContent}`,
-                    components: []
-                });
+            if (!editflag) { 
+                if (voteOverride) {
+                    const altContent = votes_openai >= votes_azure ? openaiAltObj : azureAltObj;
+                    reply.edit({
+                        content: `Alt: ${altContent}`,
+                        components: []
+                    });
+                } else {
+                    const altContent = votes_openai >= votes_azure ? `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}` : `:one: ${azureAltObj}\n\n:two: ${openaiAltObj}`;
+                    reply.edit({
+                        content: `Alt:\n\n${altContent}`,
+                        components: []
+                    });
+                }
             }
+            editflag = false
         });
     }
 });
@@ -257,6 +261,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
         }
         if ('override' in response) {
             voteOverride = response['override']
+        }
+        if ('editflag' in response) {
+            editflag = response['editflag']
         }
     } catch (error) {
         console.error(error);
