@@ -34,9 +34,12 @@ module.exports = {
                 })
             })
 
+    // sort the users by points. (index 1 is the number of points)
+    users.sort((userA, userB) => userB[1] - userA[1]);
+
     var ranking = 0
     // Users is an array of [user_id , points] pairs
-    users.reverse().forEach(async (entry) => {
+    users.forEach(async (entry) => {
         ranking += 1; 
         username = entry[0];
         points = entry[1];
