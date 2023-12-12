@@ -14,7 +14,7 @@ module.exports = {
         // CHOOSE BETWEEN IMAGES
         ,
     async execute(interaction, args) {
-        let mostRecent =  args
+        let mostRecent =  args['recentImages']
         await interaction.deferReply();
 
         // Create the button reactions that we'll append to the

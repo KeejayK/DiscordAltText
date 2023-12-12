@@ -16,7 +16,7 @@ module.exports = {
         let enable = interaction.options.getBoolean("enable");
         let response = enable
             ? "Auto generate enabled! Alt text will be provided for every image sent"
-            : "Auto generate disabled. Alt text will only be provide if prompted with the /alt command";
+            : "Auto generate disabled. Alt text will only be provide if prompted with the /alt-text command";
         await interaction.reply({ content: response, ephemeral: true });
         return {'enable': enable} 
     },

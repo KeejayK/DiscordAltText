@@ -21,6 +21,7 @@ var enableAutoReply = true;
 var recentImages = '';
 var voteTimer = 10000;
 var voteOverride = false;
+var recentResponse;
 
 
 // Create a new client instance
@@ -148,17 +149,15 @@ client.on("messageCreate", async (message) => {
 
 	// Only generate and reply with images if auto reply is enabled
 	if (enableAutoReply & hasImage) {
-		// call ai get_text_from_image_openai and get_text_from_image_azure from ai.py
         const openaiAltObj = await openaiApiCall(recentImageURL);
         const azureAltObj = await azureVisionApiCall(recentImageURL);
         const reply = await message.reply({
             content: `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}\n\nPlease vote :one: or :two: for better caption`,
             components: [row],
         });
-        // message.channel.send({ content: `${message.author} Has sent: ${message.content}`, files: [attachment] });
-        // message.delete()
 
-        // Use a 
+        recentResponse = reply
+
         var votes_openai = 0;
         var votes_azure = 0;
 
@@ -245,7 +244,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     // Command Logic
     try {
-		args = recentImages
+		let args = {};
+        args['recentImages'] =  recentImages
+        args['recentResponse'] = recentResponse
         response = await command.execute(interaction, args);
 		if (typeof response === 'undefined') return
 		if ('enable' in response ) {
