@@ -19,6 +19,7 @@ const { token } = require("./config.json");
 
 var enableAutoReply = true;
 var recentImages = '';
+var voteTimer = 10000;
 
 
 // Create a new client instance
@@ -167,8 +168,8 @@ client.on("messageCreate", async (message) => {
         const filter = (i) => i.user.id === message.author.id;
         const collector = reply.createMessageComponentCollector({
             componentType: ComponentType.Button,
-            time: 10000,
-            max:5,
+            time: voteTimer,
+            max: 5,
             filter: filter,
         });
 
@@ -247,6 +248,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		if ('enable' in response ) {
 			enableAutoReply = response['enable']
 		}
+        if ('time' in response) {
+            voteTimer = response['time']
+        }
     } catch (error) {
         console.error(error);
         if (interaction.replied || interaction.deferred) {
