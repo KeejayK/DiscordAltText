@@ -1,8 +1,7 @@
+# Alti - An Accessibility bot for Discord
+## Generate alt text for images sent on Discord with the power of A.I. 
+
+Learn more here: https://alti-9e674.web.app/
+
 TODO:
-- leaderboard
-- edit previous alt text
-	-> add response buttons to every alt text message
-	-> private message to prompt user for new edits
 - roles to enable bot visibility
-- replaces image when it adds alt text
-	-> bot replaces every new image with its own with alt text added
