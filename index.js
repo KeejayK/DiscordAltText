@@ -55,7 +55,7 @@ for (const folder of commandFolders) {
 }
 
 /**
- * Give a point to the user who 
+ * Give a point to the user who voted for the caption
  * 
  * @param {Message<boolean>} message 
  */
