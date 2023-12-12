@@ -13,11 +13,13 @@ module.exports = {
                 .setRequired(true)
         ),
     async execute(interaction, args) {
-        let override = interaction.options.getBoolean("override");
-        let response = override
+        let voteOverride = interaction.options.getBoolean("override");
+
+        let response = voteOverride
             ? "Vote override enabled! Alt text will be changed to the most upvoted alt text"
             : "Vote override disabled. Alt text will not be changed to the most upvoted alt text";
+        
         await interaction.reply({ content: response, ephemeral: false });
-        return {'override': override} 
+        return {'override': voteOverride} 
     },
 };
