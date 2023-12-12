@@ -1,4 +1,15 @@
-const { SlashCommandBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { 
+    Client, 
+    Collection, 
+    Events, 
+    GatewayIntentBits, 
+    AttachmentBuilder,
+    SlashCommandBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ActionRowBuilder,
+    ComponentType, // TODO: Remove any of these if not used
+ } = require("discord.js");
 const { openaiApiCall, azureVisionApiCall } = require("../../ai.js");
 
 module.exports = {
