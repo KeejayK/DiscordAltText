@@ -20,6 +20,7 @@ const { token } = require("./config.json");
 var enableAutoReply = true;
 var recentImages = '';
 var voteTimer = 10000;
+var voteOverride = false;
 
 
 // Create a new client instance
@@ -201,16 +202,18 @@ client.on("messageCreate", async (message) => {
             voteOpenAi.setDisabled(true);
             voteAzure.setDisabled(true);
 
-            if (votes_openai >= votes_azure) {
+            if (voteOverride) {
+                const altContent = votes_openai >= votes_azure ? openaiAltObj : azureAltObj;
                 reply.edit({
-                    content: `Alt: ${openaiAltObj}`,
+                    content: `Alt: ${altContent}`,
                     components: []
                 });
             } else {
+                const altContent = votes_openai >= votes_azure ? `:one: ${openaiAltObj}\n\n:two: ${azureAltObj}` : `:one: ${azureAltObj}\n\n:two: ${openaiAltObj}`;
                 reply.edit({
-                    content: `Alt: ${azureAltObj}`,
+                    content: `Alt:\n\n${altContent}`,
                     components: []
-                })
+                });
             }
         });
     }
@@ -250,6 +253,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		}
         if ('time' in response) {
             voteTimer = response['time']
+        }
+        if ('override' in response) {
+            voteOverride = response['override']
         }
     } catch (error) {
         console.error(error);

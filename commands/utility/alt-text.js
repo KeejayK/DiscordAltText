@@ -1,9 +1,4 @@
-const { 
-    Client, 
-    Collection, 
-    Events, 
-    GatewayIntentBits, 
-    AttachmentBuilder,
+const {
     SlashCommandBuilder,
     ButtonBuilder,
     ButtonStyle,
